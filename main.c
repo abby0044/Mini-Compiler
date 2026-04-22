@@ -313,6 +313,20 @@ printf("  ==========================================\n");
 
     ASTNode *root = runParser(srcFile);
 
+    FILE *dotFile = fopen("ast.dot", "w");
+    if (!dotFile) {
+    perror("Error creating DOT file");
+    exit(1);
+    }
+
+    fprintf(dotFile, "digraph AST {\n");
+    fprintf(dotFile, "node [shape=box];\n");
+
+    generateDOT(root, dotFile);
+
+    fprintf(dotFile, "}\n");
+    fclose(dotFile);
+
     runSemantic(root);
 
     CodeGen *cg = runCodeGen(root);
