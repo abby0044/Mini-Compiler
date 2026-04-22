@@ -398,3 +398,42 @@ void freeAST(ASTNode *node) {
     while (s) { ASTNode *nx = s->next; freeAST(s); s = nx; }
     free(node);
 }
+
+/* ─────────────────────────────────────────────
+   Graphviz DOT generator
+   ───────────────────────────────────────────── */
+
+void generateDOT(ASTNode *node, FILE *fp) {
+    if (!node) return;
+
+    fprintf(fp, "node%p[label=\"%s\\n%s\"];\n",
+            node, nodeTypeName(node->type), node->value);
+
+    if (node->condition) {
+        fprintf(fp, "node%p -> node%p [label=\"cond\"];\n", node, node->condition);
+        generateDOT(node->condition, fp);
+    }
+    if (node->left) {
+        fprintf(fp, "node%p -> node%p [label=\"left\"];\n", node, node->left);
+        generateDOT(node->left, fp);
+    }
+    if (node->right) {
+        fprintf(fp, "node%p -> node%p [label=\"right\"];\n", node, node->right);
+        generateDOT(node->right, fp);
+    }
+    if (node->thenBranch) {
+        fprintf(fp, "node%p -> node%p [label=\"then\"];\n", node, node->thenBranch);
+        generateDOT(node->thenBranch, fp);
+    }
+    if (node->elseBranch) {
+        fprintf(fp, "node%p -> node%p [label=\"else\"];\n", node, node->elseBranch);
+        generateDOT(node->elseBranch, fp);
+    }
+
+    ASTNode *s = node->body;
+    while (s) {
+        fprintf(fp, "node%p -> node%p [label=\"body\"];\n", node, s);
+        generateDOT(s, fp);
+        s = s->next;
+    }
+}
